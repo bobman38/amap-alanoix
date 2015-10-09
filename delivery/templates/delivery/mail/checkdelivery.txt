@@ -1,0 +1,7 @@
+Bonjour,
+
+Pour la prochaine livraison à l'AMAP à La Noix, le {{delivery.date}} il n'y a pas d'inscrits à la permanence.
+
+Vous pouvez vous inscrire ici : {{url}}{% url 'delivery:home' %}
+
+Merci de votre aide !

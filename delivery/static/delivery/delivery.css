@@ -1,0 +1,7 @@
+.red {
+    color: red;
+}
+
+table.small td, table.small th {
+    padding: 2px;
+}

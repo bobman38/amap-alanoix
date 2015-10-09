@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Detail livraison {{delivery.date}}{% endblock %}
+{% block content %}
+<div class="uk-grid" data-uk-grid-margin>
+    <div class="uk-width-medium-1-1">
+        <div class="uk-float-right"><a class="uk-button" href="javascript:window.print()">Imprimer cette page</a></div>
+        <h1>Livraison du {{delivery.date}}</h1>
+        <p>Voici le détail des livraisons prévues pour cette date, contrat par contrat. Les contrats suivants sont prévus sur cette livraison:</p>
+        <ul>
+        {% for contract in delivery.contracts.all %}
+            <li>[{{contract.producer}}] {{contract.name}} </li>
+        {% endfor %}
+        </ul>
+        <table class="uk-table">
+            <caption>...</caption>
+            <thead>
+                <tr>
+                    <th>Foyer</th>
+                    {% for contract in delivery.contracts.all %}
+                        {% for product in contract.producer.products.all %}
+                        <th>{{contract.producer}}<br />{{product}}</th>
+                        {% endfor %}
+                    {% endfor %}
+                    <th></th>
+                </tr>
+            </thead>
+            <tfoot>
+                <tr>
+                    <td>TOTAL</td>
+                    {% for contract in delivery.contracts.all %}
+                        {% for product in contract.producer.products.all %}
+                        <td class="sum" data-product="{{product.id}}"></td>
+                        {% endfor %}
+                    {% endfor %}
+                    <td>
+                </tr>
+            </tfoot>
+            <tbody>
+                {% for family in families %}
+                <tr>
+                    <td>{{family.name}}</td>
+                    {% for contract in delivery.contracts.all %}
+                        {% for product in contract.producer.products.all %}
+                        <td class="target" data-family="{{family.id}}" data-product="{{product.id}}"></td>
+                        {% endfor %}
+                    {% endfor %}
+                    <td><i class="uk-icon-square-o uk-icon-medium"></i></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $( document ).ready(function() {
+        $(".target").each(function() {
+            $.ajax({
+                method: "POST",
+                url: "{% url 'delivery:getorder' %}",
+                data: {
+                    family: $(this).attr('data-family'),
+                    product: $(this).attr('data-product'),
+                    date: {{delivery.id}},
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                context: this
+            }).done(function( msg ) {
+                $(this).html(msg.qty);
+            });
+        });
+
+        $(document).ajaxStop(function () {
+            $("td.sum").each(function() {
+                var product = $(this).attr('data-product');
+                var total = 0;
+                $("td.target[data-product="+product+"]").each(function() {
+                    var value = $(this).text();
+                    if(!isNaN(value) && value.length!=0) {
+                        total += parseFloat(value);
+                    }
+                });
+                $(this).text(total);
+            });
+        });
+    });
+</script>
+{% endblock %}

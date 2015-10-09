@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Gérer contrat {{contract.name}} (TRESO){% endblock %}
+{% block content %}
+<div class="uk-grid">
+    <div class="uk-width-1-1">
+        <h1>Contrat [{{contract.name}}] avec {{contract.producer}} (TRESO)</h1>
+        <form class="uk-form">
+            <table class="uk-table">
+                <caption>Ce tableau permet de visualiser le montant des chèques et de noter le statut.</caption>
+                <thead>
+                    <tr>
+                        <th>Foyer</th>
+                        <th>Montant</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in data %}
+                        <tr class="data" data-family="{{family.id}}">
+                            <td>{{row.family}}</td>
+                            <td>{{row.amount|floatformat:2}} &euro;</td>
+                            <td>
+                                <select name="select">
+                                    <option value="ko">Pas remis</option>
+                                    <option value="get" selected>Remis au référent</option>
+                                    <option value="producer">Remis au producteur</option>
+                                </select>
+                                    {{row.status}}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </form>
+        {{amount}}
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(".target").change(function() {
+        $.ajax({
+            method: "POST",
+            url: "{% url 'delivery:setorder' %}",
+            data: {
+                family: $(this).attr('data-family'),
+                product: $(this).attr('data-product'),
+                date: $(this).attr('data-date'),
+                quantity: $(this).val(),
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            context: this
+        }).success(function( msg ) {
+            $(this).toggleClass('uk-form-success');
+        });
+
+    });
+
+    $( document ).ready(function() {
+        $("tr.data").each(function() {
+            $.ajax({
+                method: "POST",
+                url: "{% url 'delivery:getorderalldates' %}",
+                data: {
+                    product: $(this).attr('data-product'),
+                    family: $(this).attr('data-family'),
+                    contract: {{contract.id}},
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                context: this
+            }).done(function( msg ) {
+                var family = $(this).attr('data-family');
+                var product = $(this).attr('data-product');
+                $.each(msg, function(i, obj) {
+                    $("input.target[data-product="+product+"][data-family="+family+"][data-date="+obj.date+"]").val(obj.qty);
+                });
+            });
+        });
+    });
+
+    $(document).ajaxStop(function () {
+        $("td.sum").each(function() {
+            var product = $(this).attr('data-product');
+            var date = $(this).attr('data-date');
+            var total = 0;
+            $("input.target[data-product="+product+"][data-date="+date+"]").each(function() {
+                var value = $(this).val();
+                if(!isNaN(value) && value.length!=0) {
+                    total += parseFloat(value);
+                }
+            });
+            $(this).text(total);
+        });
+    });
+</script>
+
+{% endblock %}

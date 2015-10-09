@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}Gérer contrat {{contract.name}}{% endblock %}
+{% block content %}
+<div class="uk-grid">
+    <div class="uk-width-1-1">
+        <div class="uk-float-right"><a class="uk-button" href="javascript:repeat()">Copier 1ere colonne</a></div>
+        <h1>Contrat [{{contract.name}}] avec {{contract.producer}}</h1>
+        <div class="uk-overflow-container">
+            <form class="uk-form">
+                <table class="uk-table small">
+                    <caption>Ce tableau permet de rentrer les quantités souhaitées pour chaque produit et chaque foyer à chaque date du contrat. N'oubliez pas de le valider. Les champs vides ou à 0 seront consideré comme sans livraison.</caption>
+                    <thead>
+                        <tr>
+                            <th>Foyer/Dates</th>
+                            <th>Produits</th>
+                            {% for date in contract.dates.all %}
+                            <th>{{date.date|date:"d-m"}}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        {% for product in contract.producer.products.all %}
+                        <tr>
+                            <td colspan="2">TOTAL {{product}}</td>
+
+                            {% for date in contract.dates.all %}
+                            <td  class="sum" data-product="{{product.id}}" data-date="{{date.id}}"></td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tfoot>
+                    <tbody>
+                        {% for family in families %}
+                            {% for product in contract.producer.products.all %}
+                                <tr class="data" data-family="{{family.id}}" data-product="{{product.id}}">
+                                    <td>{{family.name}}</td>
+                                    <td>{{product}}</td>
+                                    {% for date in contract.dates.all %}
+                                    <td><input type="text" class="uk-form-width-mini target" data-family="{{family.id}}" data-product="{{product.id}}" data-date="{{date.id}}"></td>
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(".target").change(function() {
+        $.ajax({
+            method: "POST",
+            url: "{% url 'delivery:setorder' %}",
+            data: {
+                family: $(this).attr('data-family'),
+                product: $(this).attr('data-product'),
+                date: $(this).attr('data-date'),
+                quantity: $(this).val(),
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            context: this
+        }).success(function( msg ) {
+            $(this).toggleClass('uk-form-success');
+        });
+
+    });
+
+    $( document ).ready(function() {
+        $("tr.data").each(function() {
+            $.ajax({
+                method: "POST",
+                url: "{% url 'delivery:getorderalldates' %}",
+                data: {
+                    product: $(this).attr('data-product'),
+                    family: $(this).attr('data-family'),
+                    contract: {{contract.id}},
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                context: this
+            }).done(function( msg ) {
+                var family = $(this).attr('data-family');
+                var product = $(this).attr('data-product');
+                $.each(msg, function(i, obj) {
+                    $("input.target[data-product="+product+"][data-family="+family+"][data-date="+obj.date+"]").val(obj.qty);
+                });
+            });
+        });
+    });
+
+    $(document).ajaxStop(function () {
+        $("td.sum").each(function() {
+            var product = $(this).attr('data-product');
+            var date = $(this).attr('data-date');
+            var total = 0;
+            $("input.target[data-product="+product+"][data-date="+date+"]").each(function() {
+                var value = $(this).val();
+                if(!isNaN(value) && value.length!=0) {
+                    total += parseFloat(value);
+                }
+            });
+            $(this).text(total);
+        });
+    });
+
+    function repeat() {
+        $("tr td:nth-child(3) input").each(function() {
+            var value = $(this).val();
+            var family = $(this).attr('data-family');
+            var product = $(this).attr('data-product');
+            //if(!isNaN(value) && value.length!=0) {
+                $("input.target[data-product="+product+"][data-family="+family+"]").each(function() {
+                    if($(this).val()!=value) {
+                        $(this).val(value);
+                        $(this).trigger("change");
+                    }
+                });
+            //}
+        });
+    };
+</script>
+
+{% endblock %}

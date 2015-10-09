@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% if form.errors %}
+<p>Your username and password didn't match. Please try again.</p>
+{% endif %}
+
+{% if next %}
+    {% if user.is_authenticated %}
+    <div class="uk-alert">Your account doesn't have access to this page. To proceed,
+    please login with an account that has access.</div>
+    {% else %}
+    <div class="uk-alert">Please login to see this page.</div>
+    {% endif %}
+{% endif %}
+
+<form method="post" action="{% url 'django.contrib.auth.views.login' %}" class="uk-form uk-form-stacked">
+    {% csrf_token %}
+    <div class="uk-form-row">
+        <label class="uk-form-label" for="">{{ form.username.label_tag }}</label>
+        <div class="uk-form-controls">{{ form.username }}</div>
+    </div>
+    <div class="uk-form-row">
+        <label class="uk-form-label" for="">{{ form.password.label_tag }}</label>
+        <div class="uk-form-controls">{{ form.password }}</div>
+    </div>
+    <div class="uk-form-row">
+        <div class="uk-form-controls"><input type="submit" value="Login" class="uk-button" /></div>
+    </div>
+    <input type="hidden" name="next" value="{{ next }}" />
+</form>
+
+{# Assumes you setup the password_reset view in your URLconf #}
+<p><a href="{% url 'password_reset' %}">Lost password?</a></p>
+
+{% endblock %}
