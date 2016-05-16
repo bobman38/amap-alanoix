@@ -1,10 +1,16 @@
 {% extends "base.html" %}
 {% block title %}Detail livraison {{delivery.date}}{% endblock %}
 {% block content %}
+<div class="uk-grid">
+    <div class="uk-width-4-6">
+        <h1>Livraison du {{delivery.date}}</h1>
+    </div>
+    <div class="uk-width-2-6">
+        <div class="uk-float-right"><a class="uk-button" href="javascript:window.print()">Imprimer cette page</a></div>
+    </div>
+</div>
 <div class="uk-grid" data-uk-grid-margin>
     <div class="uk-width-medium-1-1">
-        <div class="uk-float-right"><a class="uk-button" href="javascript:window.print()">Imprimer cette page</a></div>
-        <h1>Livraison du {{delivery.date}}</h1>
         <p>Voici le détail des livraisons prévues pour cette date, contrat par contrat. Les contrats suivants sont prévus sur cette livraison:</p>
         <ul>
         {% for contract in delivery.contracts.all %}
@@ -12,7 +18,6 @@
         {% endfor %}
         </ul>
         <table class="uk-table">
-            <caption>...</caption>
             <thead>
                 <tr>
                     <th>Foyer</th>

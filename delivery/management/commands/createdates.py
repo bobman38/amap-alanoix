@@ -13,7 +13,7 @@ class Command(BaseCommand):
         if days_ahead <= 0: # Target day already happened this week
             days_ahead += 7
         tuesday = today + timedelta(days_ahead)
-        nextyear = tuesday + timedelta(365)
+        nextyear = datetime.now() + timedelta(365)
         while tuesday < nextyear:
             dates = DeliveryDate.objects.filter(date=tuesday)
             if dates.count()==0:

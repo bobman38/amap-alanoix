@@ -1,0 +1,7 @@
+Un nouveau message a été posté sur le site de l'amap {{url}}{{entry.get_absolute_url}}:
+
+{{entry.body|striptags}}
+
+---
+
+Vous pouvez réagir avec un commentaire directement sur le site ({{url}}{{entry.get_absolute_url}}).

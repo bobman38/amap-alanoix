@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Django settings for amap project.
 
@@ -31,13 +32,14 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = (
+    'delivery',
+    'blog',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'delivery',
     'lineage'
 )
 
@@ -57,7 +59,7 @@ ROOT_URLCONF = 'amap.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['amap/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -69,6 +71,9 @@ TEMPLATES = [
         },
     },
 ]
+
+
+
 
 WSGI_APPLICATION = 'amap.wsgi.application'
 
@@ -85,7 +90,6 @@ DATABASES = {
         'HOST': 'localhost'
     }
 }
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/

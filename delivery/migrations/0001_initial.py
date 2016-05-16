@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from django.db import models, migrations
 from django.conf import settings
+import datetime
 
 
 class Migration(migrations.Migration):
@@ -17,25 +18,40 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('name', models.CharField(max_length=200)),
+                ('date_min', models.DateField(null=True)),
+                ('date_max', models.DateField(null=True)),
             ],
         ),
         migrations.CreateModel(
             name='DeliveryDate',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('date', models.DateTimeField(verbose_name=b'Date de Livraison')),
+                ('date', models.DateField(unique=True, verbose_name=b'Date de Livraison')),
                 ('comment', models.CharField(max_length=500, null=True, blank=True)),
-                ('ref_user', models.ManyToManyField(to=settings.AUTH_USER_MODEL)),
+                ('ref_users', models.ManyToManyField(to=settings.AUTH_USER_MODEL, blank=True)),
             ],
+            options={
+                'ordering': ['date'],
+            },
         ),
         migrations.CreateModel(
             name='Family',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('name', models.CharField(max_length=200)),
-                ('create_date', models.DateTimeField(verbose_name=b'Date de Creation')),
-                ('leave_date', models.DateTimeField(null=True, verbose_name=b'Date de d\xc3\xa9part', blank=True)),
-                ('users', models.ManyToManyField(to=settings.AUTH_USER_MODEL)),
+                ('create_date', models.DateField(default=datetime.datetime.now, verbose_name=b'Date de Creation')),
+                ('leave_date', models.DateField(null=True, verbose_name=b'Date de d\xc3\xa9part', blank=True)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Membership',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('status', models.IntegerField()),
+                ('comment', models.CharField(max_length=500, null=True, blank=True)),
+                ('amount', models.FloatField(null=True, blank=True)),
+                ('contract', models.ForeignKey(to='delivery.Contract')),
+                ('family', models.ForeignKey(to='delivery.Family')),
             ],
         ),
         migrations.CreateModel(
@@ -44,7 +60,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('quantity', models.FloatField()),
                 ('date', models.ForeignKey(to='delivery.DeliveryDate')),
-                ('family', models.ForeignKey(to='delivery.Family')),
+                ('member', models.ForeignKey(related_name='orders', to='delivery.Membership')),
             ],
         ),
         migrations.CreateModel(
@@ -52,10 +68,12 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('name', models.CharField(max_length=200)),
-                ('description', models.CharField(max_length=500, null=True, blank=True)),
-                ('mail', models.CharField(max_length=200, null=True, blank=True)),
+                ('short_product_name', models.CharField(max_length=5)),
+                ('description', models.TextField(null=True, blank=True)),
+                ('mail', models.EmailField(max_length=254, null=True, blank=True)),
                 ('tel', models.CharField(max_length=200, null=True, blank=True)),
                 ('address', models.CharField(max_length=500, null=True, blank=True)),
+                ('web', models.URLField(null=True, blank=True)),
                 ('ref_user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
             ],
         ),
@@ -65,7 +83,16 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('name', models.CharField(max_length=200)),
                 ('unit_price', models.FloatField()),
-                ('producer', models.ForeignKey(to='delivery.Producer')),
+                ('producer', models.ForeignKey(related_name='products', to='delivery.Producer')),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Profile',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('tel', models.CharField(max_length=100, null=True, blank=True)),
+                ('family', models.ForeignKey(related_name='users', blank=True, to='delivery.Family', null=True)),
+                ('user', models.OneToOneField(to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.AddField(
@@ -76,11 +103,24 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='contract',
             name='dates',
-            field=models.ManyToManyField(to='delivery.DeliveryDate'),
+            field=models.ManyToManyField(related_name='contracts', to='delivery.DeliveryDate'),
+        ),
+        migrations.AddField(
+            model_name='contract',
+            name='members',
+            field=models.ManyToManyField(to='delivery.Family', through='delivery.Membership'),
         ),
         migrations.AddField(
             model_name='contract',
             name='producer',
             field=models.ForeignKey(to='delivery.Producer'),
+        ),
+        migrations.AlterUniqueTogether(
+            name='order',
+            unique_together=set([('member', 'product', 'date')]),
+        ),
+        migrations.AlterUniqueTogether(
+            name='membership',
+            unique_together=set([('family', 'contract')]),
         ),
     ]

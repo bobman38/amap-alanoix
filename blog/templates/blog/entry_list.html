@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}News{% endblock %}
+{% block content %}
+<div class="uk-float-right"><a class="uk-button" href="{% url 'blog:new' %}">Nouveau</a></div>
+{% for entry in entry_list %}
+<article class="uk-article">
+    <h1 class="uk-article-title"><a href="{{ entry.get_absolute_url }}">{{entry.title}}</a></h1>
+    <p class="uk-article-meta">Ecrit par <a href="mailto:{{entry.author.email}}">{{entry.author}}</a> le {{entry.publication_date}}</p>
+    {{entry.body|safe|truncatewords_html:100}}
+    <p><a href="{{entry.get_absolute_url}}">Article complet (avec {{entry.count_com}} commentaires)</a></p>
+</article>
+{% endfor %}
+{% endblock %}

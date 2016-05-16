@@ -1,0 +1,14 @@
+Bonjour,
+
+Bienvenue dans l'AMAP 'à la noix'. Ce mail automatique indique que votre compte utilisateur sur le site {{url}} vient d'être créé :
+
+* url d'accès : {{url}}
+* nom d'utilisateur : {{user.username}}
+* mot de passe : {{password}}
+
+
+Pour la prochaine livraison à l'AMAP à La Noix, le {{delivery.date}} il n'y a pas d'inscrits à la permanence.
+
+Vous pouvez vous inscrire ici : {{url}}{% url 'delivery:home' %}
+
+Merci de votre aide !

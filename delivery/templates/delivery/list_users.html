@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Liste des amapiens{% endblock %}
+{% block content %}
+<h1>Liste des amapiens</h1>
+<table class="uk-table">
+    <caption>Pour pouvoir joindre un amapiens, toutes les infos dispos ici:</caption>
+    <thead>
+        <tr>
+            <th>Foyer</th>
+            <th>Amapien</th>
+            <th>Email</th>
+            <th>Téléphone</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% with old_family="" %}
+        {% for profile in profiles %}
+        <tr>
+            {% ifchanged %}
+                <td>{{profile.family.name}}</td>
+            {% else %}
+                <td>-</td>
+            {% endifchanged %}
+            <td>{{profile.user.username}}</td>
+            <td><a href="mailto:{{profile.user.email}}">{{profile.user.email}}</a></td>
+            <td><a href="tel:{{profile.tel}}">{{profile.tel}}</a></td>
+        </tr>
+        {% endfor %}
+        {% endwith %}
+    </tbody>
+</table>
+<p>Il y a
+{% endblock %}

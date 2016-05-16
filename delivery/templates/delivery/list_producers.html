@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Liste des producteurs{% endblock %}
+{% block content %}
+<h1>Liste des producteurs</h1>
+<p>Voici la liste des producteus actifs de l'amap :</p>
+<ul class="uk-grid" data-uk-grid-margin>
+    {% for producer in producers %}
+    <li class="uk-width-medium-1-2 uk-block-mute">
+        <div class="uk-panel uk-panel-box">
+            <h2>{{producer.name}}</h2>
+            <p>{{producer.description}}</p>
+            <dl class="uk-description-list-horizontal">
+                <dt>Mail</dt>
+                <dd>{{producer.email}}</dd>
+            </dl>
+            <dl class="uk-description-list-horizontal">
+                <dt>Tel</dt>
+                <dd>{{producer.tel}}</dd>
+            </dl>
+            <dl class="uk-description-list-horizontal">
+                <dt>Adresse</dt>
+                <dd>{{producer.address}}</dd>
+            </dl>
+            <dl class="uk-description-list-horizontal">
+                <dt>Web</dt>
+                <dd>{{producer.web}}</dd>
+            </dl>
+            <dl class="uk-description-list-horizontal">
+                <dt>Référent</dt>
+                <dd>{{producer.ref_user}}</dd>
+            </dl>
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

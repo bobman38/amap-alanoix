@@ -5,18 +5,36 @@ from django.db import models
 from datetime import datetime
 from django.db.models.signals import m2m_changed
 
+class Profile(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name="profile")
+    family = models.ForeignKey('Family', blank=True, null=True, related_name="profiles")
+    tel = models.CharField(max_length=100, blank=True, null=True)
+
 class Family(models.Model):
     name = models.CharField(max_length=200)
-    users = models.ManyToManyField(settings.AUTH_USER_MODEL)
+    #users = models.ManyToManyField(settings.AUTH_USER_MODEL)
     create_date = models.DateField('Date de Creation',
         default=datetime.now)
     leave_date = models.DateField('Date de départ',
             blank=True,
             null=True)
+    def countref(self, year):
+        return DeliveryDate.objects.filter(date__year=year, ref_users__profile__family=self).count()
+    def ratiohere(self, year):
+        start = datetime(year=year, month=1, day=1).date()
+        end = datetime(year=year, month=12, day=31).date()
+        if self.create_date > end:
+            start = end
+        elif  self.create_date > start :
+            start = self.create_date
+        if datetime.now().date() < end :
+            end = datetime.now().date()
+        delta = end-start
+        return float(delta.days)
     def __str__(self):
         return self.name
     def count_users(self):
-        return self.users.count()
+        return self.profiles.count()
 
 class Producer(models.Model):
     name = models.CharField(max_length=200)
@@ -78,9 +96,23 @@ class Membership(models.Model):
     amount = models.FloatField(blank=True, null=True)
     class Meta:
         unique_together = ('family', 'contract')
+    def __str__(self):
+        return self.family.name
+    STATUS = {0:'EN ATTENTE', 1:'CONTRAT OK', 2:'CHEQUE OK', 3:'CONT/CHEQ OK', 4:'TRANSMIS PROD', 5:'PROBLEME'}
+    COLOR = {0:'#F5D0A9', 1:'#F5D0A9', 2:'#F5D0A9', 3:'lightgreen', 4:'lightgreen', 5:'#F78181'}
+    def statusName(self):
+        return self.STATUS[self.status]
+    def statusColor(self):
+        return self.COLOR[self.status]
+    def computeAmount(self):
+        total_price = 0
+        orders = Order.objects.filter(member=self, product__producer=self.contract.producer, date__contracts=self.contract)
+        for order in orders:
+            total_price = total_price + order.price()
+        return total_price
 
 class Order(models.Model):
-    family = models.ForeignKey(Family, related_name="orders")
+    member = models.ForeignKey(Membership, related_name="orders")
     product = models.ForeignKey(Product)
     date = models.ForeignKey(DeliveryDate)
     quantity = models.FloatField()
@@ -89,7 +121,7 @@ class Order(models.Model):
     def price(self):
         return self.quantity*self.product.unit_price
     class Meta:
-        unique_together = ('family', 'product', 'date')
+        unique_together = ('member', 'product', 'date')
 
 def update_contract_dates(sender, instance, action, reverse, **kwargs):
     if(instance.dates.count()>0):

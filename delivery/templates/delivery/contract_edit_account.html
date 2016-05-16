@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Gérer contrat {{contract.name}} (TRESO){% endblock %}
+{% block content %}
+<div class="uk-grid">
+    <div class="uk-width-3-4">
+        <h1>Contrat [{{contract.name}}] avec {{contract.producer}} (TRESO) <a class="uk-icon-edit red" href="{% url 'delivery:contract_edit' contract.id %}" title="Gérer les livraisons"></a></h1>
+        <form class="uk-form">
+            <table class="uk-table">
+                <caption>Ce tableau permet d'ajouter des familles au contrat, de visualiser le montant des chèques et de noter le statut.</caption>
+                <thead>
+                    <tr>
+                        <th>Foyer</th>
+                        <th>Montant</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for member in members %}
+                        <tr class="data" data-family="{{member.family.id}}">
+                            <td>{{member.family.name}}</td>
+                            <td>{{member.computeAmount|floatformat:2}} &euro;</td>
+                            <td>
+                                <select class="target" name="select" data-member="{{member.id}}">
+                                    {% for id,name in status.items %}
+                                        <option value="{{id}}" {% if member.status == id %}selected="selected"{% endif %}>{{name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </form>
+    </div>
+    <div class="uk-width-1-4">
+        <p>Ajouter des foyers au contrat:</p>
+        <form action="{% url 'delivery:addfamilytocontract' contract.id %}" class="uk-form">
+            <fieldset data-uk-margin>
+                <select name="family">
+                    {% for family in families %}
+                    <option value="{{family.id}}">{{family.name}}</option>
+                    {% endfor %}
+                </select>
+                <input type="submit" class="uk-button"/>
+                <a class="uk-icon-plus" href="#addnewfamily" title="Ajouter une famille" data-uk-modal></a>
+            </fieldset>
+        </form>
+    </div>
+</div>
+
+<div id="addnewfamily" class="uk-modal">
+    <div class="uk-modal-dialog">
+        <a class="uk-modal-close uk-close"></a>
+        <h2>Ajouter un foyer</h2>
+        <form action="{% url 'delivery:contract_edit_account' contract.id %}" class="uk-form uk-form-horizontal" method="post">
+            {% csrf_token %}
+            <div class="uk-form-row">
+                {{ form.name.label_tag }}
+                <div class="uk-form-controls">{{ form.name }}</div>
+            </div>
+            <div class="uk-form-row">
+                {{ form.username.label_tag }}
+                <div class="uk-form-controls">{{ form.username }}</div>
+            </div>
+            <div class="uk-form-row">
+                {{ form.email.label_tag }}
+                <div class="uk-form-controls">{{ form.email }}</div>
+            </div>
+            <div class="uk-form-row">
+                {{ form.tel.label_tag }}
+                <div class="uk-form-controls">{{ form.tel }}</div>
+            </div>
+            <div class="uk-form-row">
+                <div class="uk-form-controls"><input type="submit" value="Ajouter" class="uk-button" /></div>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(".target").change(function() {
+        $.ajax({
+            method: "POST",
+            url: "{% url 'delivery:setstatus' %}",
+            data: {
+                member: $(this).attr('data-member'),
+                status: $(this).val(),
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            context: this
+        }).success(function( msg ) {
+            $(this).addClass('uk-form-success');
+        });
+
+    });
+</script>
+
+{% endblock %}

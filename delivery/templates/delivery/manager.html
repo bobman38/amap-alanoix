@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Réferents{% endblock %}
+{% block content %}
+
+
+<div class="uk-grid" data-uk-grid-margin>
+    <div class="uk-width-medium-1-2">
+        <div class="uk-grid">
+            <div class="uk-width-1-6">
+                <i class="uk-icon-dashboard uk-icon-large uk-text-primary"></i>
+            </div>
+            <div class="uk-width-5-6">
+                <h2 class="uk-h3">Stats permanences</h2>
+                <table class="uk-table">
+                    <caption>Toutes les stats !</caption>
+                    <thead>
+                        <tr>
+                            <th>Foyer</th>
+                            <th>Année</th>
+                            <th>Ratio de présence (j)</th>
+                            <th>Nombre de perm minimum</th>
+                            <th>Nombre de perm réalisées ou planifiées</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for perm in perms %}
+                        <tr style="background-color: {{perm.color}}">
+                            <td>{{perm.family}}</a></td>
+                            <td>{{perm.year}}</a></td>
+                            <td>{{perm.ratio}}</td>
+                            <td>{{perm.min|floatformat}}</td>
+                            <td>{{perm.value}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="uk-width-medium-1-2">
+        <div class="uk-grid">
+            <div class="uk-width-1-6">
+                <i class="uk-icon-thumbs-o-up uk-icon-large uk-text-primary"></i>
+            </div>
+            <div class="uk-width-5-6">
+                <h2 class="uk-h3">Tous les contrats</h2>
+                <table class="uk-table">
+                    <caption>Voici la liste de tous les contrats</caption>
+                    <thead>
+                        <tr>
+                            <th>Producteur</th>
+                            <th>Contrat</th>
+                            <th>Référent</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for contract in contracts %}
+                        <tr>
+                            <td>{{contract.producer}}</a></td>
+                            <td><a href="{% url 'delivery:contract_view' contract.id %}" title="Voir les livraisons">{{contract.name}}</a></td>
+                            <td><a href="mailto:{{contract.producer.ref_user.email}}?subject=[AMAP a la noix]">{{contract.producer.ref_user}}</a>
+                                <div class="uk-float-right">
+                                    <a class="uk-icon-edit red" href="{% url 'delivery:contract_edit' contract.id %}" title="Gérer les livraisons"></a>
+                                    <a class="uk-icon-dollar red" href="{% url 'delivery:contract_edit_account' contract.id %}" title="Gérer les comptes"></a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

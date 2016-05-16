@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}{{entry.title}}{% endblock %}
+{% block content %}
+<article class="uk-article">
+    <h1 class="uk-article-title"><a href="{{ entry.get_absolute_url }}">{{entry.title}}</a></h1>
+    <p class="uk-article-meta">Ecrit par <a href="mailto:{{entry.author.email}}">{{entry.author}}</a> le {{entry.publication_date}}</p>
+    {{entry.body|safe}}
+    <hr class="uk-article-divider">
+</article>
+<ul class="uk-comment-list">
+{% for comment in entry.comments.all %}
+<li>
+    <article class="uk-comment">
+        <header class="uk-comment-header">
+            <i class="uk-comment-avatar uk-icon-user uk-float-left uk-icon-large"></i>
+            <h4 class="uk-comment-title">{{comment.author}} (foyer : <i>{{comment.author.profile.family}}</i>)</h4>
+            <div class="uk-comment-meta">{{comment.creation_date}}</div>
+        </header>
+        <div class="uk-comment-body"><p>{{comment.body}}</p></div>
+    </article>
+</li>
+{% endfor %}
+</ul>
+<h2>Ajouter un commentaire</h2>
+<form action="{% url 'blog:add_comment' entry.id %}" class="uk-form" method="post">
+    <div class="uk-form-row">{{form.body}}</div>
+    <div class="uk-form-row"><input type="submit" value="Ajouter" class="uk-button" /></div>
+{% csrf_token %}
+</form>
+{% endblock %}

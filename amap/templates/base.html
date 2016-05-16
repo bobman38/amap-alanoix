@@ -1,0 +1,107 @@
+{% load staticfiles %}
+{% load lineage %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>[AMAP A La Noix] {% block title %}{% endblock %}</title>
+
+    <link href="/favicon.ico" rel="shortcut icon">
+
+    <!-- link all the styles -->
+    <link rel="stylesheet" href="{% static 'delivery/css/uikit.almost-flat.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'delivery/delivery.css' %}" />
+
+    <!-- link all the scripts -->
+    <script src="{% static 'delivery/js/jquery-2.1.4.min.js' %}"></script>
+    <script src="{% static 'delivery/js/uikit.min.js' %}"></script>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.2/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  </head>
+  <body>
+      <div class="uk-container uk-container-center uk-margin-top uk-margin-large-bottom">
+
+    <nav class="uk-navbar uk-margin-large-bottom">
+        <a class="uk-navbar-brand uk-hidden-smal" href="{% url 'delivery:start' %}">AMAP A La Noix</a>
+        <ul class="uk-navbar-nav uk-hidden-small">
+            <li class="uk-{% ancestor '/home' %}"><a href={% url 'delivery:start' %}>Index</a>
+            <li class="uk-{% ancestor '/blog' %}"><a href="{% url 'blog:blog' %}">Actus</a>
+            <li class="uk-{% ancestor '/delivery' %}"><a href="{% url 'delivery:home' %}">Livraisons</a>
+            <li class="uk-{% ancestor '/manager' %}"><a href="{% url 'delivery:manager' %}">Référents</a>
+            <li aria-expanded="false" aria-haspopup="true" class="uk-parent" data-uk-dropdown="">
+                <a>Autres <i class="uk-icon-caret-down"></i></a>
+                <div style="top: 40px; left: 0px;" class="uk-dropdown uk-dropdown-navbar uk-dropdown-bottom">
+                    <ul class="uk-nav uk-nav-navbar">
+                        <li><a href="{%url 'delivery:list_users'%}">Les amapiens</a></li>
+                        <li><a href="{%url 'delivery:list_producers'%}">Les producteurs</a></li>
+                    </ul>
+                </div>
+            </li>
+        </ul>
+        <div class="uk-navbar-flip uk-hidden-small">
+            <ul class="uk-navbar-nav">
+                {% if user.is_authenticated %}
+                <li aria-expanded="false" aria-haspopup="true" class="uk-parent" data-uk-dropdown="">
+                    <a>{{ request.user.username }} <i class="uk-icon-caret-down"></i></a>
+                    <div style="top: 40px; left: 0px;" class="uk-dropdown uk-dropdown-navbar uk-dropdown-bottom">
+                        <ul class="uk-nav uk-nav-navbar">
+                            <li><a href="{%url 'admin:index'%}">admin</a>
+                            <li><a href="{%url 'password_change'%}">Changer mot de passe</a></li>
+                            <li class="uk-nav-divider"></li>
+                            <li><a href="{%url 'logout'%}?next=/">Se déconnecter</a></li>
+                        </ul>
+                    </div>
+                </li>
+
+
+                {% else %}
+                    <li><a href="{%url 'password_reset'%}">Mot de passe oublié ?</a>
+                    <li><a href="{%url 'login'%}">Connexion</a>
+                {% endif %}
+            </ul>
+        </div>
+        <a href="#offcanvas" class="uk-navbar-toggle uk-visible-small" data-uk-offcanvas></a>
+        <div class="uk-navbar-brand uk-navbar-center uk-visible-small">A La Noix</div>
+    </nav>
+
+    {% if messages %}
+        {% for message in messages %}
+        <div class="uk-alert {% if message.level > 25 %}uk-alert-warning{% else %}uk-alert-success{% endif %}" data-uk-alert>
+            <a href="" class="uk-alert-close uk-close"></a>
+            <p>{{message}}</p>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    {% block content %}
+    {% endblock %}
+</div>
+
+<div id="offcanvas" class="uk-offcanvas">
+    <div class="uk-offcanvas-bar">
+        <ul class="uk-nav uk-nav-offcanvas">
+            <li class="uk-active"><a href="{% url 'delivery:start' %}">Index</a>
+            <li class="uk-{% ancestor '/blog' %}"><a href="{% url 'blog:blog' %}">Actus</a>
+            <li class="uk-{% ancestor '/delivery' %}"><a href="{% url 'delivery:home' %}">Livraisons</a>
+            <li class="uk-{% ancestor '/manager' %}"><a href="{% url 'delivery:manager' %}">Référents</a>
+            <li class="uk-{% ancestor '/doc' %}"><a href="#">Docs</a>
+            {% if user.is_authenticated %}
+                <li><a href="{%url 'logout'%}?next=/">Déconnexion ({{ request.user.username }})</a>
+                <li><a href="{%url 'admin:index'%}">Admin</a>
+            {% else %}
+                <li><a href="{%url 'login'%}">Login</a>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+  </body>
+</html>

@@ -26,12 +26,12 @@
         <div class="uk-form-controls">{{ form.password }}</div>
     </div>
     <div class="uk-form-row">
-        <div class="uk-form-controls"><input type="submit" value="Login" class="uk-button" /></div>
+        <div class="uk-form-controls"><input type="submit" value="Se connecter" class="uk-button" /></div>
     </div>
     <input type="hidden" name="next" value="{{ next }}" />
 </form>
 
 {# Assumes you setup the password_reset view in your URLconf #}
-<p><a href="{% url 'password_reset' %}">Lost password?</a></p>
+<p><a href="{% url 'password_reset' %}">Mot de passe perdu ?</a></p>
 
 {% endblock %}

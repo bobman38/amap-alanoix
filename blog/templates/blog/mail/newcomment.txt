@@ -1,0 +1,3 @@
+Un nouveau commentaire a été posté sur votre message : {{url}}{{comment.entry.get_absolute_url}} par l'utilisateur [{{comment.author}}]:
+
+{{comment.body|striptags}}

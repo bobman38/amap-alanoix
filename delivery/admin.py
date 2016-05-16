@@ -1,11 +1,21 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import User
 
 # Register your models here.
 from .models import *
 
+class ProfileInline(admin.StackedInline):
+    model = Profile
+    can_delete = False
+    verbose_name_plural = 'profile'
+
+# Define a new User admin
+class UserAdmin(UserAdmin):
+    inlines = (ProfileInline, )
+
 class FamilyAdmin(admin.ModelAdmin):
-    filter_horizontal = ('users',)
-    list_display = ('name', 'count_users')
+    list_display = ('name','count_users')
 
 class ProducerAdmin(admin.ModelAdmin):
     list_display = ('name', 'short_product_name', 'ref_user')
@@ -25,11 +35,15 @@ class ContractAdmin(admin.ModelAdmin):
     list_filter = ('producer', 'date_min', )
 
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('family', 'product', 'date', 'quantity')
+    list_display = ('member', 'product', 'date', 'quantity')
 
 class MembershipAdmin(admin.ModelAdmin):
     list_display = ('family', 'contract', 'status', 'amount')
     list_filter = ('family','contract', 'status')
+
+# Re-register UserAdmin
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)
 
 admin.site.register(Family, FamilyAdmin)
 admin.site.register(Producer, ProducerAdmin)

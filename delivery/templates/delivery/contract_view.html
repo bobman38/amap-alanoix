@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Voir contrat {{contract.name}}{% endblock %}
+{% block content %}
+<div class="uk-grid">
+    <div class="uk-width-1-1">
+        <h1>Contrat [{{contract.name}}] avec {{contract.producer}} </h1>
+        <div class="uk-overflow-container">
+            <form class="uk-form">
+                <table class="uk-table small">
+                    <thead>
+                        <tr>
+                            <th>Foyer/Dates</th>
+                            <th>Produits</th>
+                            {% for date in contract.dates.all %}
+                            <th>{{date.date|date:"d-m"}}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        {% for product in contract.producer.products.all %}
+                        <tr>
+                            <td colspan="2">TOTAL {{product}}</td>
+
+                            {% for date in contract.dates.all %}
+                            <td  class="sum" data-product="{{product.id}}" data-date="{{date.id}}"></td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tfoot>
+                    <tbody>
+                        {% for member in members %}
+                            {% for product in contract.producer.products.all %}
+                                <tr class="data" data-member="{{member.id}}" data-product="{{product.id}}">
+                                    <td>{{member.family.name}}</td>
+                                    <td>{{product}}</td>
+                                    {% for date in contract.dates.all %}
+                                    <td class="target" data-member="{{member.id}}" data-product="{{product.id}}" data-date="{{date.id}}"/></td>
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $( document ).ready(function() {
+        $("tr.data").each(function() {
+            $.ajax({
+                method: "POST",
+                url: "{% url 'delivery:getorderalldates' %}",
+                data: {
+                    product: $(this).attr('data-product'),
+                    member: $(this).attr('data-member'),
+                    contract: {{contract.id}},
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                context: this
+            }).done(function( msg ) {
+                var member = $(this).attr('data-member');
+                var product = $(this).attr('data-product');
+                $.each(msg, function(i, obj) {
+                    $("td.target[data-product="+product+"][data-member="+member+"][data-date="+obj.date+"]").text(obj.qty);
+                });
+            });
+        });
+    });
+
+    $(document).ajaxStop(function () {
+        $("td.sum").each(function() {
+            var product = $(this).attr('data-product');
+            var date = $(this).attr('data-date');
+            var total = 0;
+            $("td.target[data-product="+product+"][data-date="+date+"]").each(function() {
+                var value = $(this).text();
+                if(!isNaN(value) && value.length!=0) {
+                    total += parseFloat(value);
+                }
+            });
+            $(this).text(total);
+        });
+    });
+</script>
+
+{% endblock %}
