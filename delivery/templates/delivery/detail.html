@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load order %}
 {% block title %}Detail livraison {{delivery.date}}{% endblock %}
 {% block content %}
 <div class="uk-grid">
@@ -46,7 +47,7 @@
                     <td>{{family.name}}</td>
                     {% for contract in delivery.contracts.all %}
                         {% for product in contract.producer.products.all %}
-                        <td class="target" data-family="{{family.id}}" data-product="{{product.id}}"></td>
+                        <td class="target" data-family="{{family.id}}" data-product="{{product.id}}">{% get_order product family delivery %}</td>
                         {% endfor %}
                     {% endfor %}
                     <td><i class="uk-icon-square-o uk-icon-medium"></i></td>
@@ -59,34 +60,16 @@
 
 <script type="text/javascript">
     $( document ).ready(function() {
-        $(".target").each(function() {
-            $.ajax({
-                method: "POST",
-                url: "{% url 'delivery:getorder' %}",
-                data: {
-                    family: $(this).attr('data-family'),
-                    product: $(this).attr('data-product'),
-                    date: {{delivery.id}},
-                    csrfmiddlewaretoken: '{{ csrf_token }}'
-                },
-                context: this
-            }).done(function( msg ) {
-                $(this).html(msg.qty);
+        $("td.sum").each(function() {
+            var product = $(this).attr('data-product');
+            var total = 0;
+            $("td.target[data-product="+product+"]").each(function() {
+                var value = $(this).text();
+                if(!isNaN(value) && value.length!=0) {
+                    total += parseFloat(value);
+                }
             });
-        });
-
-        $(document).ajaxStop(function () {
-            $("td.sum").each(function() {
-                var product = $(this).attr('data-product');
-                var total = 0;
-                $("td.target[data-product="+product+"]").each(function() {
-                    var value = $(this).text();
-                    if(!isNaN(value) && value.length!=0) {
-                        total += parseFloat(value);
-                    }
-                });
-                $(this).text(total);
-            });
+            $(this).text(total);
         });
     });
 </script>

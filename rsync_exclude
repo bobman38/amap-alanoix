@@ -1,2 +1,3 @@
 amap/settings.py
 *.pyc
+rsync_exclude

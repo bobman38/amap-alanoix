@@ -7,12 +7,16 @@ from django.core.mail import send_mail
 from django.template.loader import get_template
 from django.template import Context
 from django.utils.crypto import get_random_string
+from django.utils.html import escape
 
 from .models import *
 from blog.models import Entry
 from django.contrib.auth.models import User
 from django.contrib import messages
 from .forms import FamilyForm
+
+import logging
+logger = logging.getLogger(__name__)
 
 def index(request):
     return render(request, 'delivery/start.html',
@@ -88,9 +92,22 @@ def removeme(request, deliverydate_id):
 def detail(request, deliverydate_id):
     deliverydate = get_object_or_404(DeliveryDate, pk=deliverydate_id)
     families = Family.objects.filter(id__in=Membership.objects.filter(contract=deliverydate.contracts.all).values_list('family_id', flat=True)).order_by('name')
+    # compute table
+    qty = {}
+    for contract in deliverydate.contracts.all():
+        for product in contract.producer.products.all():
+                product_qty = {}
+                for family in families:
+                    members = Membership.objects.filter(family=family.id)
+                    orders = Order.objects.filter(date=deliverydate, member=members, product=product)[:1]
+                    if(orders.count()==1):
+                        product_qty[family.id] = orders[0]
+                qty[product.id] = product_qty
+
     return render(request, 'delivery/detail.html',
         {'delivery' : deliverydate,
         'families' : families,
+        'qty' : qty,
         })
 
 @permission_required('delivery.add_order', raise_exception=True)
@@ -114,32 +131,35 @@ def contractview(request, contract_id):
 def contracteditaccount(request, contract_id):
     if request.method == 'POST':
         form = FamilyForm(request.POST)
-        if form.is_valid():
-            # Create user + family + profile
-            family = Family()
-            family.name = form.cleaned_data['name']
-            family.save()
-            password = get_random_string(length=6)
-            user = User.objects.create_user( form.cleaned_data['username'], form.cleaned_data['email'], password)
-            profile = Profile()
-            profile.family=family
-            profile.user=user
-            profile.tel = form.cleaned_data['tel']
-            profile.save()
+    else:
+        form = FamilyForm()
+    if form.is_valid():
+        # Create user + family + profile
+        family = Family()
+        family.name = form.cleaned_data['name']
+        family.save()
+        password = get_random_string(length=6)
+        user = User.objects.create_user( form.cleaned_data['username'], form.cleaned_data['email'], password)
+        profile = Profile()
+        profile.family=family
+        profile.user=user
+        profile.tel = form.cleaned_data['tel']
+        profile.save()
 
-            # Send welcome mail
+        # Send welcome mail
+        if form.cleaned_data['send_mail']:
             text = get_template('delivery/mail/newfamily.txt')
             d = Context({ 'user': user, 'password': password, 'url' : settings.URL })
             text_content = text.render(d)
             send_mail('[AMAP a la noix] Compte Utilisateur', text_content, 'no-reply@alanoix.fr', [user.email], fail_silently=False)
-
             messages.info(request, 'Foyer et utilisateur créé. Un mail a été envoyé à l\'utilisateur avec ses infos de connexion au site.')
+        else:
+            messages.info(request, 'Foyer et utilisateur créé. Pas d\'email envoyé.')
         return redirect('delivery:contract_edit_account', contract_id=contract_id)
     else:
         contract = get_object_or_404(Contract, pk=contract_id)
         members = Membership.objects.filter(contract=contract).order_by('family__name')
         families = Family.objects.filter(leave_date__isnull=True).exclude(id__in = Membership.objects.filter(contract=contract).values_list('family_id', flat=True)).order_by('name')
-        form = FamilyForm()
         return render(request, 'delivery/contract_edit_account.html',
             {'contract': contract,
             'members': members,
@@ -193,31 +213,6 @@ def setstatus(request):
         member.amount = member.computeAmount()
     member.save()
     return HttpResponse("OK")
-
-
-@login_required
-def getorder(request):
-    product = get_object_or_404(Product, pk=request.POST.get('product'))
-    family = get_object_or_404(Membership, pk=request.POST.get('family'))
-    date = get_object_or_404(DeliveryDate, pk=request.POST.get('date'))
-    members = Membership.objects.filter(family=family.id)
-    orders = Order.objects.filter(date=date, member=members, product=product)[:1]
-    if(orders.count()==1):
-        order = orders[0]
-        return JsonResponse({'qty':order.quantity})
-    else:
-        return JsonResponse({'qty':None})
-
-@login_required
-def getorderalldates(request):
-    product = get_object_or_404(Product, pk=request.POST.get('product'))
-    member = get_object_or_404(Membership, pk=request.POST.get('member'))
-    contract = get_object_or_404(Contract, pk=request.POST.get('contract'))
-    orders = Order.objects.filter(date__contracts=contract, member=member, product=product)
-    result = []
-    for order in orders:
-        result.append({"date": order.date.id, "qty": order.quantity})
-    return JsonResponse(result, safe=False)
 
 @login_required
 def list_users(request):

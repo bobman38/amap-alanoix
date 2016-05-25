@@ -15,9 +15,10 @@ def decorate_bound_field():
   BoundField.label_tag = add_class_label_tag(BoundField.label_tag)
 
 class FamilyForm(forms.Form):
-    name = forms.CharField(label='Nom du Foyer', max_length=100)
-    username = forms.CharField(label='Nom d\'utilisateur', max_length=100)
+    name = forms.CharField(label='Nom du Foyer', help_text='noms de famille usuellement', max_length=100)
+    username = forms.CharField(label='Nom d\'utilisateur', help_text='prenom.nom usuellement', max_length=100)
     email = forms.EmailField(label='Email')
     tel = forms.CharField(label='Telephone (non obligatoire)', max_length=100, required=False)
+    send_mail = forms.BooleanField(label='Envoyer e-mail avec identifiants ?', required=False)
 
 decorate_bound_field()

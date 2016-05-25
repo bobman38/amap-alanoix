@@ -41,8 +41,8 @@
                     <option value="{{family.id}}">{{family.name}}</option>
                     {% endfor %}
                 </select>
-                <input type="submit" class="uk-button"/>
-                <a class="uk-icon-plus" href="#addnewfamily" title="Ajouter une famille" data-uk-modal></a>
+                <input type="submit" value="Ajouter" class="uk-button"/>
+                <a class="uk-icon-plus" href="#addnewfamily" title="Ajouter une nouvelle famille" data-uk-modal></a>
             </fieldset>
         </form>
     </div>
@@ -52,28 +52,28 @@
     <div class="uk-modal-dialog">
         <a class="uk-modal-close uk-close"></a>
         <h2>Ajouter un foyer</h2>
-        <form action="{% url 'delivery:contract_edit_account' contract.id %}" class="uk-form uk-form-horizontal" method="post">
+        <form action="{% url 'delivery:contract_edit_account' contract.id %}" class="uk-form uk-form-stacked" method="post">
             {% csrf_token %}
-            <div class="uk-form-row">
-                {{ form.name.label_tag }}
-                <div class="uk-form-controls">{{ form.name }}</div>
-            </div>
-            <div class="uk-form-row">
-                {{ form.username.label_tag }}
-                <div class="uk-form-controls">{{ form.username }}</div>
-            </div>
-            <div class="uk-form-row">
-                {{ form.email.label_tag }}
-                <div class="uk-form-controls">{{ form.email }}</div>
-            </div>
-            <div class="uk-form-row">
-                {{ form.tel.label_tag }}
-                <div class="uk-form-controls">{{ form.tel }}</div>
-            </div>
+            {% for field in form %}
+                <div class="uk-form-row">
+                     <label class="uk-form-label">{{ field.label }}</label>
+                    {% for error in field.errors %}
+                    <div class="uk-alert uk-alert-warning" data-uk-alert>
+                        <a href="" class="uk-alert-close uk-close"></a>
+                        <p>{{ error }}</p>
+                    </div>
+                    {% endfor %}
+                    <div class="uk-form-controls">
+                        {{ field }}
+                        {% if field.help_text %}
+                            <span class="uk-form-help-inline"><i>{{ field.help_text|safe }}</i></span>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
             <div class="uk-form-row">
                 <div class="uk-form-controls"><input type="submit" value="Ajouter" class="uk-button" /></div>
             </div>
-
         </form>
     </div>
 </div>
@@ -95,6 +95,9 @@
         });
 
     });
+    {% if request.method == "POST" %}
+        UIkit.modal("#addnewfamily").show();
+    {% endif %}
 </script>
 
 {% endblock %}

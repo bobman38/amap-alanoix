@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load order %}
 {% block title %}Voir contrat {{contract.name}}{% endblock %}
 {% block content %}
 <div class="uk-grid">
@@ -34,7 +35,7 @@
                                     <td>{{member.family.name}}</td>
                                     <td>{{product}}</td>
                                     {% for date in contract.dates.all %}
-                                    <td class="target" data-member="{{member.id}}" data-product="{{product.id}}" data-date="{{date.id}}"/></td>
+                                    <td class="target" data-member="{{member.id}}" data-product="{{product.id}}" data-date="{{date.id}}"/>{% get_order product member.family date %}</td>
                                     {% endfor %}
                                 </tr>
                             {% endfor %}
@@ -48,28 +49,6 @@
 
 <script type="text/javascript">
     $( document ).ready(function() {
-        $("tr.data").each(function() {
-            $.ajax({
-                method: "POST",
-                url: "{% url 'delivery:getorderalldates' %}",
-                data: {
-                    product: $(this).attr('data-product'),
-                    member: $(this).attr('data-member'),
-                    contract: {{contract.id}},
-                    csrfmiddlewaretoken: '{{ csrf_token }}'
-                },
-                context: this
-            }).done(function( msg ) {
-                var member = $(this).attr('data-member');
-                var product = $(this).attr('data-product');
-                $.each(msg, function(i, obj) {
-                    $("td.target[data-product="+product+"][data-member="+member+"][data-date="+obj.date+"]").text(obj.qty);
-                });
-            });
-        });
-    });
-
-    $(document).ajaxStop(function () {
         $("td.sum").each(function() {
             var product = $(this).attr('data-product');
             var date = $(this).attr('data-date');

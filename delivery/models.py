@@ -11,7 +11,7 @@ class Profile(models.Model):
     tel = models.CharField(max_length=100, blank=True, null=True)
 
 class Family(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, unique=True)
     #users = models.ManyToManyField(settings.AUTH_USER_MODEL)
     create_date = models.DateField('Date de Creation',
         default=datetime.now)
@@ -59,6 +59,13 @@ class Product(models.Model):
     producer = models.ForeignKey(Producer, related_name="products")
     name = models.CharField(max_length=200)
     unit_price = models.FloatField()
+    def get_order(self, family, date):
+        members = Membership.objects.filter(family=family.id)
+        orders = Order.objects.filter(date=date, member=members, product=self)[:1]
+        if(orders.count()==1):
+            return str(orders[0])
+        else:
+            return ""
     def __str__(self):
         return self.name
 
