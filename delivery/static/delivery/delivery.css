@@ -5,3 +5,7 @@
 table.small td, table.small th {
     padding: 2px;
 }
+
+table thead {
+    background-color: #fff;
+}

@@ -59,9 +59,8 @@ class Product(models.Model):
     producer = models.ForeignKey(Producer, related_name="products")
     name = models.CharField(max_length=200)
     unit_price = models.FloatField()
-    def get_order(self, family, date):
-        members = Membership.objects.filter(family=family.id)
-        orders = Order.objects.filter(date=date, member=members, product=self)[:1]
+    def get_order(self, member, date):
+        orders = Order.objects.filter(date=date, member=member, product=self)[:1]
         if(orders.count()==1):
             return str(orders[0])
         else:
@@ -96,7 +95,7 @@ class Contract(models.Model):
         return self.dates.count()
 
 class Membership(models.Model):
-    family = models.ForeignKey(Family)
+    family = models.ForeignKey(Family, related_name= "members")
     contract = models.ForeignKey(Contract)
     status = models.IntegerField()
     comment = models.CharField(max_length=500, blank=True, null=True)

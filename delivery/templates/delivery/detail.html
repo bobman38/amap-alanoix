@@ -47,7 +47,7 @@
                     <td>{{family.name}}</td>
                     {% for contract in delivery.contracts.all %}
                         {% for product in contract.producer.products.all %}
-                        <td class="target" data-family="{{family.id}}" data-product="{{product.id}}">{% get_order product family delivery %}</td>
+                        <td class="target" data-family="{{family.id}}" data-product="{{product.id}}">{% get_order product family.members delivery %}</td>
                         {% endfor %}
                     {% endfor %}
                     <td><i class="uk-icon-square-o uk-icon-medium"></i></td>

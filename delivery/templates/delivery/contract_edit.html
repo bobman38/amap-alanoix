@@ -14,7 +14,7 @@
     <div class="uk-width-1-1">
         <div class="uk-overflow-container">
             <form class="uk-form">
-                <table class="uk-table small">
+                <table id="edit" class="uk-table small">
                     <caption>Ce tableau permet de rentrer les quantités souhaitées pour chaque produit et chaque foyer à chaque date du contrat. N'oubliez pas de le valider. Les champs vides ou à 0 seront consideré comme sans livraison. Appuyez sur 'c' pour copier la valeur courante sur la fin de la ligne.</caption>
                     <thead>
                         <tr>
@@ -42,7 +42,7 @@
                                     <td>{% ifchanged %}<i class="uk-icon-user" onclick="javascript:switchFamily({{member.id}})"></i> {{member.family.name}}{% endifchanged %}</td>
                                     <td>{{product}}</td>
                                     {% for date in contract.dates.all %}
-                                    <td><input type="text" class="uk-form-width-mini target" data-member="{{member.id}}" data-product="{{product.id}}" data-date="{{date.id}}" value="{% get_order product member.family date %}"></td>
+                                    <td><input type="text" class="uk-form-width-mini target" data-member="{{member.id}}" data-product="{{product.id}}" data-date="{{date.id}}" value="{% get_order product member date %}"></td>
                                     {% endfor %}
                                 </tr>
                             {% endfor %}
@@ -73,7 +73,8 @@
 
     });
 
-    $( document ).ready(function() {
+    $(document).ready(function() {
+        $("#edit").freezeHeader();
         // hide data rows
         $("tr[data-type='data']").hide();
 

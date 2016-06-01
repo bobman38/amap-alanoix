@@ -7,7 +7,7 @@
         <h1>Contrat [{{contract.name}}] avec {{contract.producer}} </h1>
         <div class="uk-overflow-container">
             <form class="uk-form">
-                <table class="uk-table small">
+                <table id="view" class="uk-table small">
                     <thead>
                         <tr>
                             <th>Foyer/Dates</th>
@@ -18,10 +18,15 @@
                         </tr>
                     </thead>
                     <tfoot>
+                        <tr>
+                            <th colspan="2">Produits</th>
+                            {% for date in contract.dates.all %}
+                            <th>{{date.date|date:"d-m"}}</th>
+                            {% endfor %}
+                        </tr>
                         {% for product in contract.producer.products.all %}
                         <tr>
                             <td colspan="2">TOTAL {{product}}</td>
-
                             {% for date in contract.dates.all %}
                             <td  class="sum" data-product="{{product.id}}" data-date="{{date.id}}"></td>
                             {% endfor %}
@@ -32,10 +37,10 @@
                         {% for member in members %}
                             {% for product in contract.producer.products.all %}
                                 <tr class="data" data-member="{{member.id}}" data-product="{{product.id}}">
-                                    <td>{{member.family.name}}</td>
+                                    <td>{% ifchanged %}{{member.family.name}}{% endifchanged %}</td>
                                     <td>{{product}}</td>
                                     {% for date in contract.dates.all %}
-                                    <td class="target" data-member="{{member.id}}" data-product="{{product.id}}" data-date="{{date.id}}"/>{% get_order product member.family date %}</td>
+                                    <td class="target" data-member="{{member.id}}" data-product="{{product.id}}" data-date="{{date.id}}"/>{% get_order product member date %}</td>
                                     {% endfor %}
                                 </tr>
                             {% endfor %}
@@ -48,7 +53,8 @@
 </div>
 
 <script type="text/javascript">
-    $( document ).ready(function() {
+    $(document).ready(function() {
+        $("#view").freezeHeader();
         $("td.sum").each(function() {
             var product = $(this).attr('data-product');
             var date = $(this).attr('data-date');
