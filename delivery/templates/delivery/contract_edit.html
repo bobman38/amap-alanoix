@@ -4,7 +4,7 @@
 {% block content %}
 <div class="uk-grid">
     <div class="uk-width-4-6">
-        <h1>Contrat [{{contract.name}}] avec {{contract.producer}} <a class="uk-icon-dollar red" href="{% url 'delivery:contract_edit_account' contract.id %}" title="Gérer les comptes"></a></h1>
+        <h1>Contrat [{{contract.name}}] avec {{contract.producer}} <a class="uk-icon-dollar red" href="{% url 'delivery:contract_edit_account' contract.id %}" title="Gérer les comptes"></a> | <a class="uk-icon-eye red" href="{% url 'delivery:contract_view' contract.id %}" title="Voir les livraisons"></a></h1>
     </div>
     <div class="uk-width-2-6">
         <div class="uk-float-right"><a class="uk-button" href="javascript:repeat()">Copier 1ere colonne</a></div>
@@ -15,13 +15,13 @@
         <div class="uk-overflow-container">
             <form class="uk-form">
                 <table id="edit" class="uk-table small">
-                    <caption>Ce tableau permet de rentrer les quantités souhaitées pour chaque produit et chaque foyer à chaque date du contrat. N'oubliez pas de le valider. Les champs vides ou à 0 seront consideré comme sans livraison. Appuyez sur 'c' pour copier la valeur courante sur la fin de la ligne.</caption>
+                    <caption>Ce tableau permet de rentrer les quantités souhaitées pour chaque produit et chaque foyer à chaque date du contrat (cliquez sur la petite icône <i class="uk-icon-user"></i> pour afficher tous les produits pour le foyer). N'oubliez pas de le valider. Les champs vides ou à 0 seront consideré comme sans livraison. Appuyez sur 'c' pour copier la valeur courante sur la fin de la ligne.</caption>
                     <thead>
                         <tr>
                             <th>Foyer/Dates</th>
                             <th>Produits</th>
                             {% for date in contract.dates.all %}
-                            <th>{{date.date|date:"d-m"}}</th>
+                            <th><a href="{% url 'delivery:detail' date.id %}">{{date.date|date:"d-m"}}</a></th>
                             {% endfor %}
                         </tr>
                     </thead>

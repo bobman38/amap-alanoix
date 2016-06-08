@@ -3,6 +3,8 @@
 from django.conf import settings
 from django.db import models
 from datetime import datetime
+from django.db.models import Sum
+from django.db.models import F
 from django.db.models.signals import m2m_changed
 
 class Profile(models.Model):
@@ -63,6 +65,20 @@ class Product(models.Model):
         orders = Order.objects.filter(date=date, member=member, product=self)[:1]
         if(orders.count()==1):
             return str(orders[0])
+        else:
+            return ""
+    def get_order_family(self, family, date):
+        memberships=Membership.objects.filter(family=family.id)
+        orders = Order.objects.filter(date=date, member=memberships, product=self)[:1]
+        if(orders.count()==1):
+            return str(orders[0])
+        else:
+            return ""
+    def get_order_all(self, date):
+        qy = Order.objects.filter(date=date, product=self).aggregate(quantity_sum=Sum(F('quantity')))
+         #return qy
+        if(qy['quantity_sum']!=None):
+            return str(qy['quantity_sum'])
         else:
             return ""
     def __str__(self):

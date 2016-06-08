@@ -88,7 +88,6 @@ def removeme(request, deliverydate_id):
     deliverydate.save()
     return redirect('delivery:home')
 
-@login_required
 def detail(request, deliverydate_id):
     deliverydate = get_object_or_404(DeliveryDate, pk=deliverydate_id)
     families = Family.objects.filter(id__in=Membership.objects.filter(contract=deliverydate.contracts.all).values_list('family_id', flat=True)).order_by('name')
@@ -125,6 +124,17 @@ def contractview(request, contract_id):
     return render(request, 'delivery/contract_view.html',
         {'contract' : contract,
         'members' : members,
+        })
+
+def contractviewnext(request, contract_id):
+    contract = get_object_or_404(Contract, pk=contract_id)
+    today_min = datetime.combine(date.today(), time.min)
+    next_deliveries = DeliveryDate.objects.filter(contracts=contract, date__gte=today_min).order_by('date')[:1]
+
+    members = Membership.objects.filter(contract=contract).order_by('family__name')
+    return render(request, 'delivery/contract_view_next.html',
+        {'contract' : contract,
+        'deliveries' : next_deliveries,
         })
 
 @permission_required('delivery.add_order', raise_exception=True)
@@ -207,10 +217,21 @@ def setorder(request):
 @permission_required('delivery.add_order', raise_exception=True)
 def setstatus(request):
     member = get_object_or_404(Membership, pk=request.POST.get('member'))
-    status = request.POST.get('status')
-    member.status = status
-    if member.status>1:
-        member.amount = member.computeAmount()
+    member.status = request.POST.get('status')
+    member.save()
+    return HttpResponse("OK")
+
+@permission_required('delivery.add_order', raise_exception=True)
+def setamount(request):
+    member = get_object_or_404(Membership, pk=request.POST.get('member'))
+    member.amount = request.POST.get('amount')
+    member.save()
+    return HttpResponse("OK")
+
+@permission_required('delivery.add_order', raise_exception=True)
+def setcomment(request):
+    member = get_object_or_404(Membership, pk=request.POST.get('member'))
+    member.comment = request.POST.get('comment')
     member.save()
     return HttpResponse("OK")
 

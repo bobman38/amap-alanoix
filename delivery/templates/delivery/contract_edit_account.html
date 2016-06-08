@@ -3,15 +3,17 @@
 {% block content %}
 <div class="uk-grid">
     <div class="uk-width-3-4">
-        <h1>Contrat [{{contract.name}}] avec {{contract.producer}} (TRESO) <a class="uk-icon-edit red" href="{% url 'delivery:contract_edit' contract.id %}" title="Gérer les livraisons"></a></h1>
+        <h1>Contrat [{{contract.name}}] avec {{contract.producer}} <a class="uk-icon-edit red" href="{% url 'delivery:contract_edit' contract.id %}" title="Gérer les livraisons"></a> | <a class="uk-icon-eye red" href="{% url 'delivery:contract_view' contract.id %}" title="Voir les livraisons"></a></h1>
         <form class="uk-form">
             <table class="uk-table">
                 <caption>Ce tableau permet d'ajouter des familles au contrat, de visualiser le montant des chèques et de noter le statut.</caption>
                 <thead>
                     <tr>
                         <th>Foyer</th>
-                        <th>Montant</th>
+                        <th>Montant calculé</th>
                         <th>Status</th>
+                        <th>Montant encaissé</th>
+                        <th>Commentaire</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -26,6 +28,8 @@
                                     {% endfor %}
                                 </select>
                             </td>
+                            <td><input type="text" data-member="{{member.id}}" class="amount" name="amount" value="{{member.amount|default_if_none:''}}"></td>
+                            <td><input type="text" data-member="{{member.id}}" class="comment" name="comment" value="{{member.comment|default_if_none:''}}" size="60"></td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -87,6 +91,36 @@
             data: {
                 member: $(this).attr('data-member'),
                 status: $(this).val(),
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            context: this
+        }).success(function( msg ) {
+            $(this).addClass('uk-form-success');
+        });
+
+    });
+    $(".amount").change(function() {
+        $.ajax({
+            method: "POST",
+            url: "{% url 'delivery:setamount' %}",
+            data: {
+                member: $(this).attr('data-member'),
+                amount: $(this).val(),
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            context: this
+        }).success(function( msg ) {
+            $(this).addClass('uk-form-success');
+        });
+
+    });
+    $(".comment").change(function() {
+        $.ajax({
+            method: "POST",
+            url: "{% url 'delivery:setcomment' %}",
+            data: {
+                member: $(this).attr('data-member'),
+                comment: $(this).val(),
                 csrfmiddlewaretoken: '{{ csrf_token }}'
             },
             context: this

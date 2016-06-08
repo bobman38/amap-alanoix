@@ -5,6 +5,7 @@
 <div class="uk-grid">
     <div class="uk-width-1-1">
         <h1>Contrat [{{contract.name}}] avec {{contract.producer}} </h1>
+        <p>Lien pour le producteur avec total pour la prochaine livraison: <a href="{% url 'delivery:contract_view_next' contract.id %}">là.</a></p>
         <div class="uk-overflow-container">
             <form class="uk-form">
                 <table id="view" class="uk-table small">
@@ -13,7 +14,7 @@
                             <th>Foyer/Dates</th>
                             <th>Produits</th>
                             {% for date in contract.dates.all %}
-                            <th>{{date.date|date:"d-m"}}</th>
+                            <th><a href="{% url 'delivery:detail' date.id %}">{{date.date|date:"d-m"}}</a></th>
                             {% endfor %}
                         </tr>
                     </thead>

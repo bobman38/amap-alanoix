@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load order %}
+{% block title %}Voir contrat {{contract.name}}{% endblock %}
+{% block content %}
+<div class="uk-grid">
+    <div class="uk-width-4-6">
+        <h1>Contrat [{{contract.name}}] avec {{contract.producer}} </h1>
+    </div>
+    <div class="uk-width-2-6">
+        <div class="uk-float-right"><a class="uk-button" href="javascript:window.print()">Imprimer cette page</a></div>
+    </div>
+</div>
+<div class="uk-grid">
+    <div class="uk-width-1-1">
+        <div class="uk-overflow-container">
+            <form class="uk-form">
+                <table id="view" class="uk-table small">
+                    <thead>
+                        <tr>
+                            <th>Produits</th>
+                            {% for date in deliveries %}
+                            <th>{{date.date|date:"d-m"}}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in contract.producer.products.all %}
+                            <tr class="data" data-product="{{product.id}}">
+                                <td>{{product}}</td>
+                                {% for date in deliveries %}
+                                <td class="target" data-product="{{product.id}}" data-date="{{date.id}}"/>{% get_order_all product date %}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
