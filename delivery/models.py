@@ -14,7 +14,6 @@ class Profile(models.Model):
 
 class Family(models.Model):
     name = models.CharField(max_length=200, unique=True)
-    #users = models.ManyToManyField(settings.AUTH_USER_MODEL)
     create_date = models.DateField('Date de Creation',
         default=datetime.now)
     leave_date = models.DateField('Date de départ',

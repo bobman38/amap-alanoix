@@ -13,7 +13,6 @@
         </tr>
     </thead>
     <tbody>
-        {% with old_family="" %}
         {% for profile in profiles %}
         <tr>
             {% ifchanged %}
@@ -26,8 +25,7 @@
             <td><a href="tel:{{profile.tel}}">{{profile.tel}}</a></td>
         </tr>
         {% endfor %}
-        {% endwith %}
     </tbody>
 </table>
-<p>Il y a
+<p>Il y a <strong>{{profiles.count}}</strong> amapiens, pour <strong>{{families.count}}</strong> foyers.</p>
 {% endblock %}

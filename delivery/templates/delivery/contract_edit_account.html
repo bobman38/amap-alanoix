@@ -22,14 +22,14 @@
                             <td>{{member.family.name}}</td>
                             <td>{{member.computeAmount|floatformat:2}} &euro;</td>
                             <td>
-                                <select class="target" name="select" data-member="{{member.id}}">
+                                <select class="target" name="status" data-member="{{member.id}}">
                                     {% for id,name in status.items %}
                                         <option value="{{id}}" {% if member.status == id %}selected="selected"{% endif %}>{{name}}</option>
                                     {% endfor %}
                                 </select>
                             </td>
-                            <td><input type="text" data-member="{{member.id}}" class="amount" name="amount" value="{{member.amount|default_if_none:''}}"></td>
-                            <td><input type="text" data-member="{{member.id}}" class="comment" name="comment" value="{{member.comment|default_if_none:''}}" size="60"></td>
+                            <td><input type="text" data-member="{{member.id}}" class="target" name="amount" value="{{member.amount|default_if_none:''}}"></td>
+                            <td><input type="text" data-member="{{member.id}}" class="target" name="comment" value="{{member.comment|default_if_none:''}}" size="60"></td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -85,50 +85,32 @@
 <script type="text/javascript">
 
     $(".target").change(function() {
+        $id = $(this).attr('data-member');
+        $status = $(".target[name=status][data-member="+$id+"]");
+        $amount = $(".target[name=amount][data-member="+$id+"]");
+        $comment = $(".target[name=comment][data-member="+$id+"]");
         $.ajax({
             method: "POST",
-            url: "{% url 'delivery:setstatus' %}",
+            url: "{% url 'delivery:setmembershipinfo' %}",
             data: {
-                member: $(this).attr('data-member'),
-                status: $(this).val(),
+                member: $id,
+                status: $status.val(),
+                amount: $amount.val(),
+                comment: $comment.val(),
                 csrfmiddlewaretoken: '{{ csrf_token }}'
             },
-            context: this
-        }).success(function( msg ) {
-            $(this).addClass('uk-form-success');
-        });
-
-    });
-    $(".amount").change(function() {
-        $.ajax({
-            method: "POST",
-            url: "{% url 'delivery:setamount' %}",
-            data: {
-                member: $(this).attr('data-member'),
-                amount: $(this).val(),
-                csrfmiddlewaretoken: '{{ csrf_token }}'
+            context: $id,
+            error: function(xhr, status, error) {
+                //alert(xhr.responseText);
+                alert("Erreur pendant la mise à jour. Retenter ou bien contacter un admin.");
+                $(".target[data-member="+this+"]").attr('class', 'uk-form-danger');
             },
-            context: this
-        }).success(function( msg ) {
-            $(this).addClass('uk-form-success');
-        });
-
-    });
-    $(".comment").change(function() {
-        $.ajax({
-            method: "POST",
-            url: "{% url 'delivery:setcomment' %}",
-            data: {
-                member: $(this).attr('data-member'),
-                comment: $(this).val(),
-                csrfmiddlewaretoken: '{{ csrf_token }}'
+            success: function( msg ) {
+                $(".target[data-member="+this+"]").attr('class', 'uk-form-success');
             },
-            context: this
-        }).success(function( msg ) {
-            $(this).addClass('uk-form-success');
         });
-
     });
+
     {% if request.method == "POST" %}
         UIkit.modal("#addnewfamily").show();
     {% endif %}
