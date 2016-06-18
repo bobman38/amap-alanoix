@@ -59,7 +59,7 @@ class Producer(models.Model):
 class Product(models.Model):
     producer = models.ForeignKey(Producer, related_name="products")
     name = models.CharField(max_length=200)
-    unit_price = models.FloatField()
+    unit_price = models.FloatField('Prix unitaire par défaut. Peut être changé pour chaque livraison.')
     def get_order(self, member, date):
         orders = Order.objects.filter(date=date, member=member, product=self)[:1]
         if(orders.count()==1):
@@ -80,6 +80,9 @@ class Product(models.Model):
             return str(qy['quantity_sum'])
         else:
             return ""
+    def get_price(self, date):
+        prices = Price.objects.filter(deliverydate=date, product=self)[:1]
+        return str(prices[0].value)
     def __str__(self):
         return self.name
 
@@ -140,9 +143,17 @@ class Order(models.Model):
     def __str__(self):
         return str(self.quantity)
     def price(self):
-        return self.quantity*self.product.unit_price
+        price = Price.objects.filter(product=self.product, deliverydate=self.date)[:1][0]
+        return self.quantity*price.value
     class Meta:
         unique_together = ('member', 'product', 'date')
+
+class Price(models.Model):
+    product = models.ForeignKey(Product)
+    deliverydate = models.ForeignKey(DeliveryDate)
+    value = models.FloatField()
+    class Meta:
+        unique_together = ('product', 'deliverydate')
 
 def update_contract_dates(sender, instance, action, reverse, **kwargs):
     if(instance.dates.count()>0):

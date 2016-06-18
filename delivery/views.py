@@ -119,18 +119,6 @@ def detail(request, deliverydate_id):
         'qty' : qty,
         })
 
-#@permission_required('delivery.add_order', raise_exception=True)
-def contractedit(request, contract_id):
-    contract = get_object_or_404(Contract, pk=contract_id)
-    members = Membership.objects.filter(contract=contract).order_by('family__name')
-    if(request.user.is_superuser or contract.producer.ref_user==request.user):
-        return render(request, 'delivery/contract_edit.html',
-            {'contract' : contract,
-            'members' : members,
-            })
-    else:
-        raise PermissionDenied
-
 def contractview(request, contract_id):
     contract = get_object_or_404(Contract, pk=contract_id)
     members = Membership.objects.filter(contract=contract).order_by('family__name')
@@ -149,6 +137,17 @@ def contractviewnext(request, contract_id):
         {'contract' : contract,
         'deliveries' : next_deliveries,
         })
+
+def contractedit(request, contract_id):
+    contract = get_object_or_404(Contract, pk=contract_id)
+    members = Membership.objects.filter(contract=contract).order_by('family__name')
+    if(request.user.is_superuser or contract.producer.ref_user==request.user):
+        return render(request, 'delivery/contract_edit.html',
+            {'contract' : contract,
+            'members' : members,
+            })
+    else:
+        raise PermissionDenied
 
 def contracteditaccount(request, contract_id):
     contract = get_object_or_404(Contract, pk=contract_id)
@@ -183,6 +182,20 @@ def contracteditaccount(request, contract_id):
         else:
             members = Membership.objects.filter(contract=contract).order_by('family__name')
             families = Family.objects.filter(leave_date__isnull=True).exclude(id__in = Membership.objects.filter(contract=contract).values_list('family_id', flat=True)).order_by('name')
+
+
+            # add Price for each Product / Delivery Date for current contrat if not existing !
+            # set with the Product.unit_value = default_value
+            for product in contract.producer.products.all():
+                for deliverydate in contract.dates.all() :
+                    prices = Price.objects.filter(deliverydate=deliverydate, product=product)[:1]
+                    if(prices.count()==0):
+                        price = Price()
+                        price.product = product
+                        price.deliverydate = deliverydate
+                        price.value = product.unit_price
+                        price.save()
+
             return render(request, 'delivery/contract_edit_account.html',
                 {'contract': contract,
                 'members': members,
@@ -242,6 +255,20 @@ def setmembershipinfo(request):
             member.amount = None
         member.comment = request.POST.get('comment')
         member.save()
+        return HttpResponse("OK")
+    else:
+        raise PermissionDenied
+
+def setprice(request):
+    product = get_object_or_404(Product, pk=request.POST.get('product'))
+    if(request.user.is_superuser or product.producer.ref_user==request.user):
+        date = get_object_or_404(DeliveryDate, pk=request.POST.get('date'))
+        price = Price.objects.filter(deliverydate=date, product=product)[:1][0]
+        if(request.POST.get('amount') != ""):
+            price.value = request.POST.get('value').replace(',','.')
+        else:
+            price.value = 0
+        price.save()
         return HttpResponse("OK")
     else:
         raise PermissionDenied

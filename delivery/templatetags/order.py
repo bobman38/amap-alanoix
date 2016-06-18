@@ -13,3 +13,7 @@ def get_order_family(obj, epk, second_arg):
 @register.simple_tag
 def get_order_all(obj, epk):
     return obj.get_order_all(epk)
+
+@register.simple_tag
+def get_price(obj, epk):
+    return obj.get_price(epk)

@@ -1,12 +1,14 @@
 {% extends "base.html" %}
+{% load order %}
 {% block title %}Gérer contrat {{contract.name}} (TRESO){% endblock %}
 {% block content %}
 <div class="uk-grid">
     <div class="uk-width-3-4">
         <h1>Contrat [{{contract.name}}] avec {{contract.producer}} <a class="uk-icon-edit red" href="{% url 'delivery:contract_edit' contract.id %}" title="Gérer les livraisons"></a> | <a class="uk-icon-eye red" href="{% url 'delivery:contract_view' contract.id %}" title="Voir les livraisons"></a></h1>
+        <h2>Ajouter des foyers au contrat</h2>
         <form class="uk-form">
             <table class="uk-table">
-                <caption>Ce tableau permet d'ajouter des familles au contrat, de visualiser le montant des chèques et de noter le statut.</caption>
+                <caption>Ce tableau permet d'ajouter des foyers au contrat, de visualiser le montant des chèques et de noter le statut.</caption>
                 <thead>
                     <tr>
                         <th>Foyer</th>
@@ -35,6 +37,8 @@
                 </tbody>
             </table>
         </form>
+
+
     </div>
     <div class="uk-width-1-4">
         <p>Ajouter des foyers au contrat:</p>
@@ -82,6 +86,35 @@
     </div>
 </div>
 
+<h2>Editer les prix des produits pour chaque livraison</h2>
+<div class="uk-overflow-container">
+    <form class="uk-form">
+        <table class="uk-table small">
+            <caption>Ce tableau permet d'éditer les prix des produits pour chaque livraison du contrat</caption>
+            <thead>
+                <tr>
+                    <th>Produit</th>
+                    {% for date in contract.dates.all %}
+                    <th>{{date.date|date:"d-m"}}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in contract.producer.products.all %}
+                    <tr class="data" data-product="{{product.id}}">
+                        <td>{{product.name}}</td>
+                        {% for date in contract.dates.all %}
+                        <td>
+                            <input type="text" class="uk-form-width-mini targetprice" data-product="{{product.id}}" data-date="{{date.id}}" value="{% get_price product date %}">
+                        </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </form>
+</div>
+
 <script type="text/javascript">
 
     $(".target").change(function() {
@@ -107,6 +140,28 @@
             },
             success: function( msg ) {
                 $(".target[data-member="+this+"]").attr('class', 'uk-form-success');
+            },
+        });
+    });
+
+    $(".targetprice").change(function() {
+        $.ajax({
+            method: "POST",
+            url: "{% url 'delivery:setprice' %}",
+            data: {
+                product: $(this).attr('data-product'),
+                date: $(this).attr('data-date'),
+                value: $(this).val(),
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            context: this,
+            error: function(xhr, status, error) {
+                //alert(xhr.responseText);
+                alert("Erreur pendant la mise à jour. Retenter ou bien contacter un admin.");
+                $(this).toggleClass('uk-form-danger');
+            },
+            success: function( msg ) {
+                $(this).toggleClass('uk-form-success');
             },
         });
     });

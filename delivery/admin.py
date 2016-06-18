@@ -41,6 +41,10 @@ class MembershipAdmin(admin.ModelAdmin):
     list_display = ('family', 'contract', 'status', 'amount')
     list_filter = ('family','contract', 'status')
 
+class PriceAdmin(admin.ModelAdmin):
+    list_display = ('product', 'deliverydate', 'value')
+    list_filter = ('product','deliverydate' )
+
 # Re-register UserAdmin
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
@@ -52,3 +56,4 @@ admin.site.register(DeliveryDate,DeliveryDateAdmin)
 admin.site.register(Contract, ContractAdmin)
 admin.site.register(Membership, MembershipAdmin)
 admin.site.register(Order, OrderAdmin)
+admin.site.register(Price, PriceAdmin)

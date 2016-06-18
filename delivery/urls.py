@@ -15,6 +15,7 @@ urlpatterns = [
     url(r'^delivery/editaccount/(?P<contract_id>[0-9]+)/add$', views.addfamilytocontract, name='addfamilytocontract'),
     url(r'^delivery/manage/setorder$', views.setorder, name='setorder'),
     url(r'^delivery/manage/setmembershipinfo$', views.setmembershipinfo, name='setmembershipinfo'),
+    url(r'^delivery/manage/setprice$', views.setprice, name='setprice'),
     url(r'^manager$', views.manager, name='manager'),
     url(r'^users$', views.list_users, name='list_users'),
     url(r'^producers$', views.list_producers, name='list_producers'),
