@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% load flatpages %}
+{% block title %}Aide{% endblock %}
+{% block content %}
+{% get_flatpages for request.user as flatpages %}
+<h1>Toutes les pages d'aide</h1>
+<ul>
+    {% for page in flatpages %}
+        <li><a href="{{ page.url }}">{{ page.title }}</a></li>
+    {% endfor %}
+</ul>
+{% endblock %}

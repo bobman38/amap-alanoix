@@ -6,6 +6,7 @@ from django.template.loader import get_template
 from django.template import Context
 from django.core.mail import send_mass_mail, send_mail
 from django.contrib.auth.models import User
+from ckeditor_uploader.fields import RichTextUploadingField
 
 class Entry(models.Model):
     """
@@ -17,7 +18,7 @@ class Entry(models.Model):
     creation_date = models.DateTimeField(auto_now_add=True)
     publication_date = models.DateTimeField(default=datetime.now())
     modification_date = models.DateTimeField(auto_now=True)
-    body = models.TextField('Contenu')
+    body = RichTextUploadingField('Contenu')
     def __str__(self):
         return self.title
     def count_com(self):

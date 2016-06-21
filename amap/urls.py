@@ -15,13 +15,21 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+from django.views.generic import TemplateView
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^blog/', include('blog.urls', namespace="blog")),
     url(r'^', include('delivery.urls', namespace="delivery")),
-    url('^', include('django.contrib.auth.urls'))
+    url('^', include('django.contrib.auth.urls')),
+    url(r'^help/$', TemplateView.as_view(template_name='flatpages/index.html'), name='help'),
+    url(r'^pages/', include('django.contrib.flatpages.urls')),
+    url(r'^ckeditor/', include('ckeditor_uploader.urls')),
 ]
+
+from . import settings
+if settings.DEBUG:
+  urlpatterns.append(url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}))
 
 handler404 = 'delivery.views.error404'
 handler403 = 'delivery.views.error403'

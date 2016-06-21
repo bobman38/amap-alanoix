@@ -249,7 +249,7 @@ def setmembershipinfo(request):
     member = get_object_or_404(Membership, pk=request.POST.get('member'))
     if(request.user.is_superuser or member.contract.producer.ref_user==request.user):
         member.status = request.POST.get('status')
-        if(request.POST.get('amount') != ""):
+        if(request.POST.get('amount') != None and request.POST.get('amount') != ""):
             member.amount = request.POST.get('amount').replace(',','.')
         else:
             member.amount = None

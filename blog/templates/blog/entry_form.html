@@ -2,8 +2,9 @@
 {% load staticfiles %}
 {% block title %}Nouveau sujet{% endblock %}
 {% block content %}
-<script src="{% static 'blog/ckeditor/ckeditor.js' %}"></script>
+
 <form action="" class="uk-form uk-form-horizontal" method="post">
+    {{ form.media }}
     {% csrf_token %}
     <div class="uk-form-row">
         <label class="uk-form-label" for="">{{ form.title.label }}</label>
@@ -17,7 +18,4 @@
         <div class="uk-form-controls"><input type="submit" value="Créer !" class="uk-button"/></div>
     </div>
 </form>
-<script>
-CKEDITOR.replace( 'id_body' );
-</script>
 {% endblock %}

@@ -41,8 +41,14 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'lineage',
-    'django_extensions'
+    'django_extensions',
+    'django.contrib.sites',
+    'django.contrib.flatpages',
+    'ckeditor',
+    'ckeditor_uploader'
 )
+
+SITE_ID = 1
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -88,11 +94,7 @@ LOGGING = {
     },
 }
 
-
-
-
 WSGI_APPLICATION = 'amap.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
@@ -125,6 +127,37 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = 'static/'
+
+CKEDITOR_JQUERY_URL = '//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js'
+CKEDITOR_UPLOAD_PATH = 'uploads/'
+CKEDITOR_CONFIGS = {
+    'default': {
+        'toolbar': 'Custom',
+        'toolbar_Custom': [
+            {'name': 'clipboard', 'items': ['Cut', 'Copy', 'Paste', 'PasteText', '-', 'Undo']},
+            {'name': 'basicstyles',
+             'items': ['Bold', 'Italic', 'Underline', 'Strike', '-', 'RemoveFormat']},
+            {'name': 'paragraph',
+             'items': ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', '-',
+                       'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock']},
+            {'name': 'links', 'items': ['Link', 'Unlink']},
+            {'name': 'insert',
+             'items': ['Image', 'Table', 'HorizontalRule']},
+            '/',
+            {'name': 'styles', 'items': ['Styles', 'Format']},
+            {'name': 'tools', 'items': ['Maximize', 'Source']},
+        ],
+        'extraPlugins': ','.join(
+            [
+                'clipboard',
+            ]),
+    }
+}
+
+CKEDITOR_BROWSE_SHOW_DIRS = True
+MEDIA_ROOT = 'media/'
+MEDIA_URL = '/media/'
 
 # Logins
 
