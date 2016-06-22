@@ -1,3 +1,5 @@
 amap/settings.py
 *.pyc
 rsync_exclude
+static/*
+media/*

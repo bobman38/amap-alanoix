@@ -64,14 +64,15 @@ def manager(request):
     families = Family.objects.filter(leave_date__isnull=True)
     perms = []
     for family in families:
-        perms.extend(getPerms(family))
+        perms.extend(getPerms(family, True))
 
     return render(request, 'delivery/manager.html',
         {'contracts': contracts,
          'perms' : perms,
+         'families' : families,
         })
 
-def getPerms(family):
+def getPerms(family, onlylate = False):
     year  = datetime.now().year - 2
     perms = []
     if(family != None):
@@ -80,7 +81,10 @@ def getPerms(family):
             min = 2 * family.ratiohere(year)/365
             if family.countref(year) < min:
                 color = 'orange'
-            perms.append({"family": family, "year": year, "ratio": family.ratiohere(year), "min": min,  "value": family.countref(year), "color": color})
+            if color == 'orange' or onlylate == False:
+                perms.append({"family": family, "year": year, "ratio": family.ratiohere(year), "min": min,  "value": family.countref(year), "color": color})
+
+
             year = year + 1
     return perms
 

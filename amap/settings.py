@@ -152,6 +152,8 @@ CKEDITOR_CONFIGS = {
             [
                 'clipboard',
             ]),
+        'removePlugins': 'stylesheetparser',
+        'allowedContent': True,
     }
 }
 

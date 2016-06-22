@@ -3,7 +3,7 @@
 from django.conf import settings
 from django.db import models
 from datetime import datetime
-from django.db.models import Sum
+from django.db.models import Sum, Max
 from django.db.models import F
 from django.db.models.signals import m2m_changed
 
@@ -32,6 +32,8 @@ class Family(models.Model):
             end = datetime.now().date()
         delta = end-start
         return float(delta.days)
+    def endContractDate(self):
+        return Contract.objects.filter(members=self).aggregate(date_max=Max('date_max'))['date_max']
     def __str__(self):
         return self.name
     def count_users(self):
