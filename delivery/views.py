@@ -104,9 +104,6 @@ def removeme(request, deliverydate_id):
 
 def detail(request, deliverydate_id):
     deliverydate = get_object_or_404(DeliveryDate, pk=deliverydate_id)
-    #families = Family.objects.filter(id__in=Membership.objects.filter(contract=deliverydate.contracts.all).values_list('family_id', flat=True)).order_by('name')
-    #members = Membership.objects.filter(contract__dates=deliverydate)
-    #contracts = Contract.objects.filter(dates=deliverydate)
     families = Family.objects.filter(id__in=Membership.objects.filter(contract__dates=deliverydate).values_list('family_id', flat=True)).order_by('name')
     return render(request, 'delivery/detail.html',
         {'delivery' : deliverydate,
