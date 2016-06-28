@@ -86,8 +86,8 @@
     </div>
 </div>
 
-<h2>Editer les prix des produits pour chaque livraison</h2>
-<div class="uk-overflow-container">
+<h2>Editer les prix des produits pour chaque livraison <a data-uk-toggle="{target: '#price'}"><i class="uk-icon-justify uk-icon-plus-square"></i></a></h2>
+<div id="price" class="uk-overflow-container uk-hidden">
     <form class="uk-form">
         <table class="uk-table small">
             <caption>Ce tableau permet d'éditer les prix des produits pour chaque livraison du contrat</caption>
@@ -116,7 +116,6 @@
 </div>
 
 <script type="text/javascript">
-
     $(".target").change(function() {
         $id = $(this).attr('data-member');
         $status = $(".target[name=status][data-member="+$id+"]");

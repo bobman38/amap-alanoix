@@ -70,7 +70,7 @@ class Product(models.Model):
             return ""
     def get_order_family(self, family, date):
         memberships=Membership.objects.filter(family=family.id)
-        orders = Order.objects.filter(date=date, member=memberships, product=self)[:1]
+        orders = Order.objects.filter(date=date, member__in=memberships, product=self)[:1]
         if(orders.count()==1):
             return str(orders[0])
         else:

@@ -104,23 +104,13 @@ def removeme(request, deliverydate_id):
 
 def detail(request, deliverydate_id):
     deliverydate = get_object_or_404(DeliveryDate, pk=deliverydate_id)
-    families = Family.objects.filter(id__in=Membership.objects.filter(contract=deliverydate.contracts.all).values_list('family_id', flat=True)).order_by('name')
-    # compute table
-    qty = {}
-    for contract in deliverydate.contracts.all():
-        for product in contract.producer.products.all():
-                product_qty = {}
-                for family in families:
-                    members = Membership.objects.filter(family=family.id)
-                    orders = Order.objects.filter(date=deliverydate, member=members, product=product)[:1]
-                    if(orders.count()==1):
-                        product_qty[family.id] = orders[0]
-                qty[product.id] = product_qty
-
+    #families = Family.objects.filter(id__in=Membership.objects.filter(contract=deliverydate.contracts.all).values_list('family_id', flat=True)).order_by('name')
+    #members = Membership.objects.filter(contract__dates=deliverydate)
+    #contracts = Contract.objects.filter(dates=deliverydate)
+    families = Family.objects.filter(id__in=Membership.objects.filter(contract__dates=deliverydate).values_list('family_id', flat=True)).order_by('name')
     return render(request, 'delivery/detail.html',
         {'delivery' : deliverydate,
         'families' : families,
-        'qty' : qty,
         })
 
 def contractview(request, contract_id):
